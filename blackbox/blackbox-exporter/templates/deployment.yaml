@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "blackbox-exporter.fullname" . }}
+  labels:
+    {{- include "blackbox-exporter.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "blackbox-exporter.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        sha_for_redeploy: {{ include (print $.Template.BasePath "/settings.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "blackbox-exporter.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "blackbox-exporter.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+          - /bin/blackbox_exporter
+          args:
+          - "--config.file=/etc/blackbox_exporter/config.yml"
+          ports:
+            - name: blackbox-port
+              containerPort: 9115
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: blackbox-port
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - mountPath: /etc/blackbox_exporter/config.yml
+            name: blackbox-exporter
+            subPath: config.yml
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: {{ include "blackbox-exporter.fullname" . }}
+        name: blackbox-exporter
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

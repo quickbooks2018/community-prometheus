@@ -1,0 +1,55 @@
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 1m
+    route:   
+      group_by:
+      - alertname
+      group_wait: 1s
+      group_interval: 1m
+      repeat_interval: 3h
+      receiver: 'prometheus'
+      routes:
+      - receiver: 'alerts'
+        match_re:
+          severity: critical
+        continue: true
+    receivers:
+    - name: 'alerts'
+      slack_configs:
+      - api_url: "https://hooks.slack.com/services/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"
+        channel: '#notifications'
+        send_resolved: true
+        username: '{{ template "slack.my.username" . }}'
+        title: '{{ template "slack.my.title" . }}'
+        text: '{{ template "slack.my.text" . }}'
+    - name: 'prometheus'
+      slack_configs:
+      - api_url: "https://hooks.slack.com/services/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"
+        channel: '#notifications'
+        send_resolved: true
+        username: '{{ template "slack.my.username" . }}'
+        title: '{{ template "slack.my.title" . }}'
+        text: '{{ template "slack.my.text" . }}'
+  templateFiles:
+    slack.tmpl: |-
+      {{ define "slack.my.username" -}}
+      Kuber Staging
+      {{- end -}}
+      {{ define "slack.my.title" -}}
+        {{- if .CommonAnnotations.summary -}}
+          [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonAnnotations.summary }}
+        {{- else -}}
+          [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ with index .Alerts 0 }}{{ .Annotations.summary }}{{ end }}
+        {{- end -}}
+      {{- end -}}
+      {{ define "slack.my.text" }}
+        {{- if .CommonAnnotations.description }}
+          {{ .CommonAnnotations.description }}
+        {{- else }}
+          {{- range .Alerts }}
+
+      • {{ .Annotations.description }}
+          {{- end }}
+        {{- end }}
+      {{- end }}

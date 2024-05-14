@@ -1,0 +1,100 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    app: kube-prometheus-stack
+    release: prometheus-community
+  name: blackbox-alerts-rule
+  namespace: monitoring
+spec:
+  groups:
+    - name: blackbox-alerts-rule
+      rules:
+      - alert: BlackboxSlowClassifierProbe
+        expr: avg_over_time(probe_duration_seconds{custom_alert_rule="classifier"}[1m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Blackbox slow probe 
+          description: "Blackbox probe for {{ $labels.instance }} Classifier took more than 1s to complete: {{ $value }}"
+      - alert: BlackboxVerySlowClassifierProbe
+        expr: avg_over_time(probe_duration_seconds{custom_alert_rule="classifier"}[1m]) > 8
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Blackbox very slow probe 
+          description: "Blackbox probe for {{ $labels.instance }} Classifier took more than 3s to complete: {{ $value }}"
+      - alert: BlackboxSlowToxicityProbe
+        expr: avg_over_time(probe_duration_seconds{custom_alert_rule="toxicity"}[1m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Blackbox slow probe 
+          description: "Blackbox probe for {{ $labels.instance }} Toxicity took more than 1s to complete: {{ $value }}"
+      - alert: BlackboxVerySlowToxicityProbe
+        expr: avg_over_time(probe_duration_seconds{custom_alert_rule="toxicity"}[1m]) > 8
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Blackbox very slow probe 
+          description: "Blackbox probe for {{ $labels.instance }} Toxicity took more than 3s to complete: {{ $value }}" 
+      - alert: BlackboxSlowProbe
+        expr: avg_over_time(probe_duration_seconds{custom_alert_rule!="toxicity", custom_alert_rule !="classifier"}[1m]) > 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Blackbox slow probe
+          description: "Blackbox probe for {{ $labels.instance }} took more than 1s to complete: {{ $value }}"
+      - alert: BlackboxVerySlowProbe
+        expr: avg_over_time(probe_duration_seconds{custom_alert_rule!="toxicity", custom_alert_rule !="classifier"}[1m]) > 3
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Blackbox very slow probe
+          description: "Blackbox probe for {{ $labels.instance }} took more than 3s to complete: {{ $value }}"       
+      - alert: BlackboxSslCertificateWillExpireSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 30
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Blackbox SSL certificate will expire soon
+          description: "SSL certificate expires for {{ $labels.instance }} in days: {{ $value }}"
+      - alert: BlackboxProbeHttpFailure
+        expr: (probe_http_status_code != 0) and (probe_http_status_code <= 199 OR probe_http_status_code >= 400)
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Blackbox probe HTTP failure"
+          description: "HTTP status code is {{ $value }} (not 200-399) for {{ $labels.instance }}"
+      - alert: BlackboxProbeHttpTimeout
+        expr: probe_http_status_code == 0
+        for: 60s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Blackbox probe HTTP return {{ $value }} code "
+          description: “HTTP status code for {{ $labels.instance }} is {{ $value }}. Timeout communictaion to blackbox”    
+      # - alert: BlackboxProbeFailed
+      #   expr: probe_success == 0
+      #   for: 0m
+      #   labels:
+      #     severity: critical
+      #   annotations:
+      #     summary: "Simple probe (instance {{ $labels.instance }})"
+      #     description: "HTTP PROBE failed"
+      - alert: BlackboxSslCertificateWillExpireSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 3
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Blackbox SSL certificate will expire soon for {{ $labels.instance }}"
+          description: "SSL certificate expires in 3 days: {{ $value }}"

@@ -1,0 +1,8 @@
+kubeScheduler:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+coreDns:
+  enabled: false
+kubeProxy:
+  enabled: false

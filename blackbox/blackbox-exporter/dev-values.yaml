@@ -1,0 +1,14 @@
+blackbox:
+  get:
+    saqlainmushtaq-com:
+      timeout: 50s
+      scrape_interval: 120s
+      scrape_timeout: 50s
+      targets: 
+        - https://saqlainmushtaq.com
+    cloudgeeks-ca:
+      timeout: 50s
+      scrape_interval: 120s
+      scrape_timeout: 50s
+      targets: 
+        - https://cloudgeeks.ca

@@ -1,0 +1,179 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name:  {{ include "blackbox-exporter.fullname" . }}
+  labels:
+    {{- include "blackbox-exporter.labels" . | nindent 4 }}
+data:
+  config.yml: |
+    modules:
+      http_2xx:
+        prober: http
+        http:
+          preferred_ip_protocol: ip4
+          fail_if_not_ssl: false
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: []  # Defaults to 2xx
+      {{- range $name, $get := .Values.blackbox.get }} 
+      http_get_{{ $name }}:
+        prober: http
+        timeout: {{ $get.timeout }}
+        http:
+          preferred_ip_protocol: ip4
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: []  # Defaults to 2xx  
+          fail_if_not_ssl: false     
+          method: GET
+      {{- end}}      
+      {{- range $name, $post := .Values.blackbox.post }} 
+      http_post_{{ $name }}:
+        prober: http
+        timeout: {{ $post.timeout }}
+        http:
+          preferred_ip_protocol: ip4
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: []  # Defaults to 2xx  
+          fail_if_not_ssl: false     
+          method: POST
+          headers:
+          {{- with $post }}
+          {{- toYaml .headers | nindent 12 }}
+          {{- end }}
+          body: '{{ $post.body }}'
+      {{- end}} 
+      {{- range $name, $dns := .Values.blackbox.dns }} 
+      dns_{{ $name }}:
+        prober: dns
+        timeout: {{ $dns.timeout }}
+        dns:
+          preferred_ip_protocol: ip4
+          transport_protocol: udp
+          query_name: {{ $dns.query_name }}
+          query_type: {{ $dns.query_type }}
+      {{- end}}     
+      http_post_2xx:
+        prober: http
+        http:
+          method: POST
+      tcp_connect:
+        prober: tcp
+      pop3s_banner:
+        prober: tcp
+        tcp:
+          query_response:
+          - expect: "^+OK"
+          tls: true
+          tls_config:
+            insecure_skip_verify: false
+      ssh_banner:
+        prober: tcp
+        tcp:
+          query_response:
+          - expect: "^SSH-2.0-"
+          - send: "SSH-2.0-blackbox-ssh-check"
+      irc_banner:
+        prober: tcp
+        tcp:
+          query_response:
+          - send: "NICK prober"
+          - send: "USER prober prober prober :prober"
+          - expect: "PING :([^ ]+)"
+            send: "PONG ${1}"
+          - expect: "^:[^ ]+ 001"
+      icmp:
+        prober: icmp
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "blackbox-exporter.fullname" . }}-configs
+  labels:
+    {{- include "blackbox-exporter.labels" . | nindent 4 }}  
+type: Opaque
+stringData:
+  blackbox-exporter.yaml: |
+    #scrape_configs:
+    {{- range $name, $get := .Values.blackbox.get }} 
+    - job_name: 'http-get-{{ $name }}'
+      scrape_interval: {{ $get.scrape_interval }} # default 15s
+      scrape_timeout: {{ $get.scrape_timeout }} # default 10s
+      metrics_path: /probe
+      params:
+        module: [http_get_{{ $name }}]
+      static_configs:
+        - targets:
+      {{- with  $get.targets }}
+      {{- toYaml . | nindent 10 }}
+      {{- end }}
+      relabel_configs:
+        {{- with $get.labels }}
+        {{- range $name, $label := . }}
+        - source_labels: {{ $label.key }}
+          target_label: {{ $label.value }}
+        {{- end }}  
+        {{- end }}
+        - source_labels: [module]
+          target_label: __param_module
+        - source_labels: [__address__] 
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: {{ include "blackbox-exporter.fullname" $ }}:{{ $.Values.service.port }}  
+    {{- end}}       
+    {{- range $name, $post := .Values.blackbox.post }} 
+    - job_name: 'http-post-{{ $name }}'
+      scrape_interval: {{ $post.scrape_interval }} # default 15s
+      scrape_timeout: {{ $post.scrape_timeout }} # default 10s
+      metrics_path: /probe
+      params:
+        module: [http_post_{{ $name }}]  # Look for a HTTP 200 response.
+      static_configs:
+        - targets:
+      {{- with  $post.targets }}
+      {{- toYaml . | nindent 10 }}
+      {{- end }}
+      relabel_configs:
+        {{- with $post.labels }}
+        {{- range $name, $label := . }}
+        - target_label: {{ $label.key }}
+          replacement: {{ $label.value }}
+        {{- end }}  
+        {{- end }}
+        - source_labels: [module]
+          target_label: __param_module
+        - source_labels: [__address__] 
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: {{ include "blackbox-exporter.fullname" $ }}:{{ $.Values.service.port }}  
+    {{- end}}      
+    {{- range $name, $dns := .Values.blackbox.dns }} 
+    - job_name: 'dns-{{ $name }}'
+      scrape_interval: {{ $dns.scrape_interval }} # default 15s
+      scrape_timeout: {{ $dns.scrape_timeout }} # default 10s
+      metrics_path: /probe
+      params:
+        module: [dns_{{ $name }}]
+      static_configs:
+        - targets:
+      {{- with  $dns.targets }}
+      {{- toYaml . | nindent 10 }}
+      {{- end }}  
+      relabel_configs:
+        {{- with $dns.labels }}
+        {{- range $name, $label := . }}
+        - source_labels: {{ $label.key }}
+          target_label: {{ $label.value }}
+        {{- end }}  
+        {{- end }}
+        - source_labels: [module]
+          target_label: __param_module
+        - source_labels: [__address__] 
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: {{ include "blackbox-exporter.fullname" $ }}:{{ $.Values.service.port }}  
+    {{- end}}      
