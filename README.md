@@ -40,3 +40,7 @@ kubectl -n monitoring apply -f alerts/rules/
 ```
 
 - Note: Enable persistance for prometheus and grafana, as I am using sandbox environment, so I disabled it.
+
+- Slack APP Creation https://api.slack.com/apps
+```bash
+https://api.slack.com/apps
