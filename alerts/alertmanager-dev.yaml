@@ -17,7 +17,7 @@ alertmanager:
     receivers:
     - name: 'alerts'
       slack_configs:
-      - api_url: "https://hooks.slack.com/services/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"
+      - api_url: "https://hooks.slack.com/services/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         channel: '#notifications'
         send_resolved: true
         username: '{{ template "slack.my.username" . }}'
@@ -25,7 +25,7 @@ alertmanager:
         text: '{{ template "slack.my.text" . }}'
     - name: 'prometheus'
       slack_configs:
-      - api_url: "https://hooks.slack.com/services/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"
+      - api_url: "https://hooks.slack.com/services/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         channel: '#notifications'
         send_resolved: true
         username: '{{ template "slack.my.username" . }}'
