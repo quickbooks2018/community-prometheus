@@ -47,6 +47,7 @@ kubectl -n monitoring apply -f alerts/rules/
 - Slack APP Creation https://api.slack.com/apps
 ```bash
 https://api.slack.com/apps
+```
 
 - BlackBox DashBoard https://grafana.com/grafana/dashboards/7587-prometheus-blackbox-exporter
 - Import 7587
