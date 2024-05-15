@@ -1,5 +1,7 @@
 # Kubernetes Monitoring with Prometheus
 
+- Concept https://www.youtube.com/watch?v=6xmWr7p5TE0
+
 - Helm Prometheus Installation
 
 ```bash
