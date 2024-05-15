@@ -49,5 +49,12 @@ kubectl -n monitoring apply -f alerts/rules/
 https://api.slack.com/apps
 ```
 
+- CRD & ServiceMonitors
+```bash
+k get crd
+k get crd | grep -i servicemonitor
+k get servicemonitor -A
+```
+
 - BlackBox DashBoard https://grafana.com/grafana/dashboards/7587-prometheus-blackbox-exporter
 - Import 7587
