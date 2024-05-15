@@ -54,6 +54,7 @@ https://api.slack.com/apps
 k get crd
 k get crd | grep -i servicemonitor
 k get servicemonitor -A
+k get prometheusrule -A
 ```
 
 - BlackBox DashBoard https://grafana.com/grafana/dashboards/7587-prometheus-blackbox-exporter
