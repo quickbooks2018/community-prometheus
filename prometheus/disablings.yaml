@@ -1,8 +1,10 @@
+# CoreDNS is disabled on GKE as it uses kube-dns, enable it on EKS as it uses CoreDNS
+---
 kubeScheduler:
-  enabled: false
+  enabled: true
 kubeControllerManager:
-  enabled: false
+  enabled: true
 coreDns:
   enabled: false
 kubeProxy:
-  enabled: false
+  enabled: true
