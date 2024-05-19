@@ -62,8 +62,87 @@ k get prometheusrule -A
 - BlackBox DashBoard https://grafana.com/grafana/dashboards/7587-prometheus-blackbox-exporter
 - Import 7587
 
-- ServiceMonitor labels
+- PodMonitor for ArgoCD
 ```bash
 k get crds
 k -n monitoring get prometheus.monitoring.coreos.com -o yaml | grep -iC5 servicemonitor
+```
+- PodMonitor
+```yaml
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/
+
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: argocd-metrics
+  labels:
+    release: prometheus-community
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-metrics
+  namespaceSelector:
+    any: true
+  podMetricsEndpoints:
+  - port: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: argocd-server
+  labels:
+    release: prometheus-community
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-server
+  namespaceSelector:
+    any: true
+  podMetricsEndpoints:
+  - port: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: argocd-repo-server
+  labels:
+    release: prometheus-community
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-repo-server
+  namespaceSelector:
+    any: true
+  podMetricsEndpoints:
+  - port: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: argocd-applicationset-controller
+  labels:
+    release: prometheus-community
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-applicationset-controller
+  namespaceSelector:
+    any: true
+  podMetricsEndpoints:
+  - port: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: argocd-notifications-controller
+  labels:
+    release: prometheus-community
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-notifications-controller
+  namespaceSelector:
+    any: true
+  podMetricsEndpoints:
+  - port: metrics
 ```
