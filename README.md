@@ -70,7 +70,9 @@ k get crds
 k -n monitoring get prometheus.monitoring.coreos.com -o yaml | grep -iC5 servicemonitor
 ```
 - PodMonitor
-- k -n argocd apply -f PodMonitor.yaml
+```bash
+k -n argocd apply -f PodMonitor.yaml
+```
 
 - PodMonitor.yaml
 ```yaml
