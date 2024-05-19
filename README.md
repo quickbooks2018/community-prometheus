@@ -3,6 +3,7 @@
 - Concept https://www.youtube.com/watch?v=6xmWr7p5TE0
 - Concept https://www.youtube.com/watch?v=O4pKFUE8FDg
 - Concept https://www.youtube.com/watch?v=HOmdYtsB950
+- Concept https://www.youtube.com/watch?v=dMca4jHaft8
 
 - Helm Prometheus Installation
 - https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
