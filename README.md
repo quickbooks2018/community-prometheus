@@ -4,6 +4,7 @@
 - Concept https://www.youtube.com/watch?v=O4pKFUE8FDg
 
 - Helm Prometheus Installation
+- https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
 
 - https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
 ```bash
