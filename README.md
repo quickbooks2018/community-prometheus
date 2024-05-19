@@ -76,6 +76,7 @@ k -n argocd apply -f PodMonitor.yaml
 
 - PodMonitor.yaml
 - https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/
+  
 ```yaml
 ---
 apiVersion: monitoring.coreos.com/v1
@@ -154,6 +155,10 @@ spec:
   - port: metrics
 ```
 
+```bash
+k get podmonitor -n argocd
+```
+
 - ArgoCD ServiceMonitor
 
 ```bash
@@ -186,4 +191,8 @@ spec:
       app.kubernetes.io/name: argocd-repo-server-metrics
   endpoints:
   - port: metrics
+```
+
+```bash
+k get servicemonitor -n argocd
 ```
