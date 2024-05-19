@@ -64,6 +64,24 @@ k get prometheusrule -A
 - BlackBox DashBoard https://grafana.com/grafana/dashboards/7587-prometheus-blackbox-exporter
 - Import 7587
 
+- ArgoCD Installation with Helm
+```bash
+helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace \
+  --version 6.9.3 \
+  --set server.serviceMonitor.enabled=true \
+  --set controller.metrics.enabled=true \
+  --set controller.metrics.serviceMonitor.enabled=true \
+  --set repoServer.metrics.enabled=true \
+  --set repoServer.metrics.serviceMonitor.enabled=true \
+  --set applicationController.metrics.enabled=true \
+  --set applicationController.metrics.serviceMonitor.enabled=true \
+  --wait
+```
+
+- ArgoCD Grafana Dashboards
+- https://grafana.com/grafana/dashboards/14584-argocd/
+- https://grafana.com/grafana/dashboards/19974-argocd-application-overview/
+
 - PodMonitor for ArgoCD
 ```bash
 k get crds
