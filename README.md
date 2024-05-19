@@ -77,7 +77,7 @@ kind: PodMonitor
 metadata:
   name: argocd-metrics
   labels:
-    release: prometheus-community
+    release: prometheus-community # This is the helm chart NAME helm ls -A
 spec:
   selector:
     matchLabels:
