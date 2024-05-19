@@ -155,6 +155,11 @@ spec:
 ```
 
 - ArgoCD ServiceMonitor
+
+```bash
+k -n argocd apply -f ServiceMonitor.yaml
+```
+- ServiceMonitor.yaml
 ```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
