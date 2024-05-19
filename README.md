@@ -75,9 +75,9 @@ k -n argocd apply -f PodMonitor.yaml
 ```
 
 - PodMonitor.yaml
+- https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/
 ```yaml
-# https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/
-
+---
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
@@ -151,5 +151,34 @@ spec:
   namespaceSelector:
     any: true
   podMetricsEndpoints:
+  - port: metrics
+```
+
+- ArgoCD ServiceMonitor
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-application-controller-metrics
+  labels:
+    release: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-metrics
+  endpoints:
+  - port: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-repo-server-metrics
+  labels:
+    release: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-repo-server-metrics
+  endpoints:
   - port: metrics
 ```
