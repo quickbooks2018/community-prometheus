@@ -82,24 +82,9 @@ k -n argocd apply -f PodMonitor.yaml
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
-  name: argocd-metrics
-  labels:
-    release: prometheus-community # This is the helm chart NAME helm ls -A
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: argocd-metrics
-  namespaceSelector:
-    any: true
-  podMetricsEndpoints:
-  - port: metrics
----
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
-metadata:
   name: argocd-server
   labels:
-    release: prometheus-community
+    release: prometheus-community # This is the helm chart NAME helm ls -A
 spec:
   selector:
     matchLabels:
