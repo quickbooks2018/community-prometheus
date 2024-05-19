@@ -61,3 +61,9 @@ k get prometheusrule -A
 
 - BlackBox DashBoard https://grafana.com/grafana/dashboards/7587-prometheus-blackbox-exporter
 - Import 7587
+
+- ServiceMonitor labels
+```bash
+k get crds
+k -n monitoring get prometheus.monitoring.coreos.com -o yaml | grep -iC5 servicemonitor
+```
