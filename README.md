@@ -162,7 +162,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: argocd-metrics
   endpoints:
-  - port: metrics
+  - port: http-metrics
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -175,7 +175,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: argocd-repo-server-metrics
   endpoints:
-  - port: metrics
+  - port: http-metrics
 ```
 
 ```bash
