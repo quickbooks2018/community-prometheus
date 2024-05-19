@@ -156,7 +156,7 @@ kind: ServiceMonitor
 metadata:
   name: argocd-application-controller-metrics
   labels:
-    release: prometheus-operator
+    release: prometheus-community
 spec:
   selector:
     matchLabels:
@@ -169,7 +169,7 @@ kind: ServiceMonitor
 metadata:
   name: argocd-repo-server-metrics
   labels:
-    release: prometheus-operator
+    release: prometheus-community
 spec:
   selector:
     matchLabels:
