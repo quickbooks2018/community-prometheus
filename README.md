@@ -14,10 +14,10 @@ helm search repo prometheus-community/prometheus
 helm search repo prometheus-community/prometheus --versions
 helm search repo prometheus-community/kube-prometheus-stack
 helm search repo prometheus-community/kube-prometheus-stack --versions
-helm show values prometheus-community/kube-prometheus-stack --version 58.5.1
+helm show values prometheus-community/kube-prometheus-stack --version 58.5.3
 
 helm upgrade --install prometheus-community prometheus-community/kube-prometheus-stack \
---version 58.5.1 \
+--version 58.5.3 \
 --namespace monitoring \
 --create-namespace \
 --timeout 30m \
