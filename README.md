@@ -205,3 +205,298 @@ k get servicemonitor -n argocd
 
 - ArgoCD Notifications
 - Bitnami Helm Chart Repo https://charts.bitnami.com/bitnami
+
+- Slack1
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argocd-notifications-secret # Dont change the name, notification service by default look for this secret. 
+  namespace: argocd
+stringData:
+  slack-token: "SLACK TOKEN"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+data:
+  service.slack: |
+    token: $slack-token 
+  defaultTriggers: |   # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/triggers/#default-triggers 
+    - on-deployed
+  trigger.on-deployed: |  # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/triggers/ 
+    - description: Application is synced and healthy. Triggered once per commit.
+      oncePer: app.status.sync.revision
+      send:
+      - app-deployed
+      when: app.status.sync.status in ['Synced'] and app.status.health.status == 'Healthy'
+  template.app-deployed: | # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/templates/
+    message: |
+      {{if eq .serviceType "slack"}}:white_check_mark:{{end}} Application {{.app.metadata.name}} is now running new version of deployments manifests.
+    slack:
+      attachments: |
+        [{
+          "title": "{{ .app.metadata.name}}",
+          "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#18be52",
+          "fields": [
+          {
+            "title": "Sync Status",
+            "value": "{{.app.status.sync.status}}",
+            "short": true
+          },
+          {
+            "title": "Repository",
+            "value": "{{.app.spec.source.repoURL}}",
+            "short": true
+          },
+          {
+            "title": "Revision",
+            "value": "{{.app.status.sync.revision}}",
+            "short": true
+          }
+          {{range $index, $c := .app.status.conditions}}
+          {{if not $index}},{{end}}
+          {{if $index}},{{end}}
+          {
+            "title": "{{$c.type}}",
+            "value": "{{$c.message}}",
+            "short": true
+          }
+          {{end}}
+          ]
+        }]
+```
+
+- Slack2
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argocd-notifications-secret # Dont change the name, notification service by default look for this secret. 
+  namespace: argocd
+stringData:
+  slack-token: "YOUR SLACK TOKEN"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+data:
+  service.slack: |
+    token: $slack-token
+  defaultTriggers: |   
+    - on-deployed
+    - on-sync-failed
+    - on-sync-succeeded
+    - on-health-healthy
+    - on-health-degraded
+  trigger.on-deployed: |  
+    - description: Application is synced and healthy. Triggered once per commit.
+      oncePer: app.status.sync.revision
+      send:
+      - app-deployed
+      when: app.status.sync.status in ['Synced'] and app.status.health.status == 'Healthy'
+  trigger.on-sync-failed: |
+    - description: Application sync operation failed.
+      send:
+      - app-sync-failed
+      when: app.status.operationState.phase in ['Failed']
+  trigger.on-sync-succeeded: |
+    - description: Application sync operation succeeded.
+      send:
+      - app-sync-succeeded
+      when: app.status.operationState.phase in ['Succeeded']
+  trigger.on-health-healthy: |
+    - description: Application has become healthy.
+      send:
+      - app-health-healthy
+      when: app.status.health.status == 'Healthy'
+  trigger.on-health-degraded: |
+    - description: Application health has degraded.
+      send:
+      - app-health-degraded
+      when: app.status.health.status == 'Degraded'
+  template.app-deployed: |
+    message: |
+      {{if eq .serviceType "slack"}}:white_check_mark:{{end}} Application {{.app.metadata.name}} is now running new version of deployments manifests.
+    slack:
+      attachments: |
+        [{
+          "title": "{{ .app.metadata.name}}",
+          "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#18be52",
+          "fields": [
+          {
+            "title": "Sync Status",
+            "value": "{{.app.status.sync.status}}",
+            "short": true
+          },
+          {
+            "title": "Repository",
+            "value": "{{.app.spec.source.repoURL}}",
+            "short": true
+          },
+          {
+            "title": "Revision",
+            "value": "{{.app.status.sync.revision}}",
+            "short": true
+          }
+          {{range $index, $c := .app.status.conditions}}
+          {{if not $index}},{{end}}
+          {{if $index}},{{end}}
+          {
+            "title": "{{$c.type}}",
+            "value": "{{$c.message}}",
+            "short": true
+          }
+          {{end}}
+          ]
+        }]
+  template.app-sync-failed: |
+    message: |
+      Application {{.app.metadata.name}} sync operation failed.
+    slack:
+      attachments: |
+        [{
+          "title": "{{ .app.metadata.name}}",
+          "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#ff0000",
+          "fields": [
+          {
+            "title": "Sync Status",
+            "value": "{{.app.status.sync.status}}",
+            "short": true
+          },
+          {
+            "title": "Repository",
+            "value": "{{.app.spec.source.repoURL}}",
+            "short": true
+          },
+          {
+            "title": "Revision",
+            "value": "{{.app.status.sync.revision}}",
+            "short": true
+          }
+          ]
+        }]
+  template.app-sync-succeeded: |
+    message: |
+      Application {{.app.metadata.name}} sync operation succeeded.
+    slack:
+      attachments: |
+        [{
+          "title": "{{ .app.metadata.name}}",
+          "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#18be52",
+          "fields": [
+          {
+            "title": "Sync Status",
+            "value": "{{.app.status.sync.status}}",
+            "short": true
+          },
+          {
+            "title": "Repository",
+            "value": "{{.app.spec.source.repoURL}}",
+            "short": true
+          },
+          {
+            "title": "Revision",
+            "value": "{{.app.status.sync.revision}}",
+            "short": true
+          }
+          ]
+        }]
+  template.app-health-healthy: |
+    message: |
+      Application {{.app.metadata.name}} is healthy.
+    slack:
+      attachments: |
+        [{
+          "title": "{{ .app.metadata.name}}",
+          "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#18be52",
+          "fields": [
+          {
+            "title": "Health Status",
+            "value": "{{.app.status.health.status}}",
+            "short": true
+          },
+          {
+            "title": "Repository",
+            "value": "{{.app.spec.source.repoURL}}",
+            "short": true
+          },
+          {
+            "title": "Revision",
+            "value": "{{.app.status.sync.revision}}",
+            "short": true
+          }
+          ]
+        }]
+  template.app-health-degraded: |
+    message: |
+      Application {{.app.metadata.name}} health status is degraded.
+    slack:
+      attachments: |
+        [{
+          "title": "{{ .app.metadata.name}}",
+          "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#ff0000",
+          "fields": [
+          {
+            "title": "Health Status",
+            "value": "{{.app.status.health.status}}",
+            "short": true
+          },
+          {
+            "title": "Repository",
+            "value": "{{.app.spec.source.repoURL}}",
+            "short": true
+          },
+          {
+            "title": "Revision",
+            "value": "{{.app.status.sync.revision}}",
+            "short": true
+          }
+          ]
+        }]
+```
+
+- ArgoCD App Yaml
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx-app
+  namespace: argocd
+  annotations:
+    notifications.argoproj.io/subscribe.on-deployed.slack: notifications
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: notifications
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: notifications
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    name: 'in-cluster'
+    namespace: 'default'
+  source:
+    repoURL: 'https://charts.bitnami.com/bitnami'
+    chart: 'nginx'
+    targetRevision: '13.2.31'  # Specify the desired version of the chart
+    helm:
+      values: |  # Inline values, you can customize these as per your requirements
+        service:
+          type: ClusterIP
+        replicaCount: 2
+  project: 'default'
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+```
