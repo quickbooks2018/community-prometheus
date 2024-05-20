@@ -199,3 +199,6 @@ spec:
 ```bash
 k get servicemonitor -n argocd
 ```
+
+- ArgoCD Notifications
+- Bitnami Helm Chart Repo https://charts.bitnami.com/bitnami
