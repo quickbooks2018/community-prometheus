@@ -75,6 +75,9 @@ helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace \
   --set repoServer.metrics.serviceMonitor.enabled=true \
   --set applicationController.metrics.enabled=true \
   --set applicationController.metrics.serviceMonitor.enabled=true \
+  --set notifications.enabled=true \
+  --set notifications.secret.create=false \
+  --set notifications.cm.create=false \
   --wait
 ```
 
