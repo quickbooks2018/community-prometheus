@@ -67,7 +67,7 @@ k get prometheusrule -A
 - ArgoCD Installation with Helm
 ```bash
 helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace \
-  --version 6.9.3 \
+  --version 5.46.8 \
   --set server.serviceMonitor.enabled=true \
   --set controller.metrics.enabled=true \
   --set controller.metrics.serviceMonitor.enabled=true \
