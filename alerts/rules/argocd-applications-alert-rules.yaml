@@ -17,14 +17,14 @@ spec:
       annotations:
         summary: '{{ $labels.name }} ArgoCD Application has synchronization issue'
     - alert: ArgoApplicationSynced
-      expr: argocd_app_info{sync_status="Synced"} == 1
+      expr: argocd_app_info{sync_status="Synced"} == 0
       for: 1m
       labels:
         severity: info
       annotations:
         summary: '{{ $labels.name }} ArgoCD Application is synchronized'
     - alert: ArgoApplicationHealthy
-      expr: argocd_app_info{health_status="Healthy"} == 1
+      expr: argocd_app_info{health_status="Healthy"} == 0
       for: 1m
       labels:
         severity: info
