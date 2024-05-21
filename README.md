@@ -466,7 +466,7 @@ data:
         }]
 ```
 
-- ArgoCD App Yaml
+- ArgoCD Sample App Bitnami nginx Yaml
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -494,9 +494,9 @@ spec:
         replicaCount: 2
   project: 'default'
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    #automated:
+    #  prune: false
+    #  selfHeal: false
     syncOptions:
       - CreateNamespace=false
 ```
