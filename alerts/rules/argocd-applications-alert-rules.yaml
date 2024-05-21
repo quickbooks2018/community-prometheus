@@ -1,0 +1,46 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    app: kube-prometheus-stack
+    release: prometheus-community
+  name: prometheus-argocd-rules
+spec:
+  groups:
+  - name: ArgoCD Rules
+    rules:
+    - alert: ArgoApplicationOutOfSync
+      expr: argocd_app_info{sync_status="OutOfSync"} == 1
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: '{{ $labels.name }} ArgoCD Application has synchronization issue'
+    - alert: ArgoApplicationSynced
+      expr: argocd_app_info{sync_status="Synced"} == 1
+      for: 1m
+      labels:
+        severity: info
+      annotations:
+        summary: '{{ $labels.name }} ArgoCD Application is synchronized'
+    - alert: ArgoApplicationHealthy
+      expr: argocd_app_info{health_status="Healthy"} == 1
+      for: 1m
+      labels:
+        severity: info
+      annotations:
+        summary: '{{ $labels.name }} ArgoCD Application is healthy'
+    - alert: ArgoApplicationDegraded
+      expr: argocd_app_info{health_status="Degraded"} == 1
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: '{{ $labels.name }} ArgoCD Application is degraded'
+    - alert: ArgoApplicationSuspended
+      expr: argocd_app_info{operation_state_phase="Suspended"} == 1
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: '{{ $labels.name }} ArgoCD Application is suspended'
