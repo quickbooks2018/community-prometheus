@@ -500,3 +500,13 @@ spec:
     syncOptions:
       - CreateNamespace=false
 ```
+
+- Note: Always apply like below
+```bash
+k -n argocd apply -f notification.yaml
+```
+
+- Argocd debug notification logs
+```bash
+kubectl logs -n argocd deployment/argocd-notifications-controller -f
+```
